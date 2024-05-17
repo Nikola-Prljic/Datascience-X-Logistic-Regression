@@ -6,6 +6,16 @@ from sys import argv
 from utils.load_csv import load
 from utils.python_colors import color
 
+def get_dicts():
+    colors = {'Gryffindor': 'red',
+              'Ravenclaw': 'blue',
+              'Slytherin': 'green',
+              'Hufflepuff': 'orange'}
+    subjects_names = ['Arithmancy', 'Astronomy', 'Herbology', 'Defense Against the Dark Arts',
+                    'Divination', 'Muggle Studies', 'Ancient Runes', 'History of Magic',
+                    'Transfiguration', 'Potions', 'Care of Magical Creatures', 'Charms', 'Flying']
+    return colors, subjects_names
+
 def variance(colum):
     var = sum(((colum - colum.mean()) ** 2))
     var = var / (len(colum) - 1)
@@ -19,22 +29,12 @@ def var_df(df: pd.DataFrame):
     return variances
 
 def plt_histogram(df: pd.DataFrame):
-    df_ori = df.dropna()
-    score_columns = ['Arithmancy', 'Astronomy', 'Herbology', 'Defense Against the Dark Arts',
-                 'Divination', 'Muggle Studies', 'Ancient Runes', 'History of Magic',
-                 'Transfiguration', 'Potions', 'Care of Magical Creatures', 'Charms', 'Flying']
-    df = df_ori.copy()
-    #df[score_columns] = df[score_columns].apply(lambda x: (x - x.min()) / (x.max() - x.min()), axis=0)
-
-    variances = var_df(df[score_columns])
-    homogeneous_subject = variances.idxmin()[0]
-
+    df = df.dropna()
+    colors, subjects_names = get_dicts()
+    #df[subjects_names] = df[subjects_names].apply(lambda x: (x - x.min()) / (x.max() - x.min()), axis=0)
+    variances = var_df(df[subjects_names])
+    homogeneous_subject = variances.idxmin().iloc[0]
     plt.figure(figsize=(10, 6))
-
-    colors = {'Gryffindor': 'red',
-              'Ravenclaw': 'blue',
-              'Slytherin': 'green',
-              'Hufflepuff': 'orange'}
 
     for house in df['Hogwarts House'].unique():
         color = colors[house]
