@@ -7,7 +7,7 @@ import numpy as np
 
 def describe_csv(filepath: str):
     df = load(filepath)
-    df = df.drop(columns=['Hogwarts House', 'First Name', 'Last Name', 'Birthday', 'Best Hand'])
+    df = df.select_dtypes(['number'])
     df = df.dropna()
     calc = operations(df)
     features_dicts = {'Feature ' + str(i + 1) : calc.describe_col(f) 
@@ -15,6 +15,7 @@ def describe_csv(filepath: str):
     df = pd.DataFrame(data=features_dicts,
                       index=['Count', 'Mean', 'Std', 'Min', '25%', '50%', '75%', 'Max'])
     print(df)
+    return df
 
 def main():
     if len(argv) != 2:
