@@ -3,6 +3,7 @@ import tensorflow as tf
 import pandas as pd
 import numpy as np
 import keras
+
 from model.normalize import Normalize
 
 def load_data(path_train, path_test):
@@ -12,12 +13,7 @@ def load_data(path_train, path_test):
 
 def get_input_layers(features):
     # Features used to train the model on.
-    inputs = {
-        features[0]: keras.Input(shape=(1,)),
-        features[1]: keras.Input(shape=(1,)),
-        features[2]: keras.Input(shape=(1,)),
-        features[3]: keras.Input(shape=(1,))
-    }
+    inputs = {name: keras.Input(shape=(1,)) for name in features}
     return inputs
 
 def split_df(df: pd.DataFrame, split=0.8):
@@ -39,16 +35,11 @@ def str_to_int(train_df: pd.DataFrame, test_df: pd.DataFrame):
 
 def prepare_data(path_train, path_test, split=0.8):
     df, predict_df = load_data(path_train, path_test)
-
     train_df, test_df = split_df(df, split)
-
     train_label, test_label = str_to_int(train_df, test_df)
 
-    train_df = train_df.drop(['Hogwarts House'], axis=1)
-    test_df = test_df.drop(['Hogwarts House'], axis=1)
-    
-    train_df = train_df.select_dtypes(include=['number'])
-    test_df = test_df.select_dtypes(include=['number'])
+    train_df = train_df.drop(['Hogwarts House'], axis=1).select_dtypes(include=['number'])
+    test_df = test_df.drop(['Hogwarts House'], axis=1).select_dtypes(include=['number'])
 
     train_df = normalize(train_df)
     test_df = normalize(test_df)
