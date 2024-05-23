@@ -49,18 +49,23 @@ def train_model(model: keras.Model, dataset: pd.DataFrame, epochs, label_name, b
     return epochs, hist
 
 def logisticRegression(feature1, feature2, train_path, test_path, learning_rate, epochs, batch_size=10):
-    train_df, test_df = prepare_data(train_path, test_path)
-    train_df_norm = normalize_columns(train_df, feature1, feature2)
+    df, predict_df = prepare_data(train_path, test_path)
+    train_df_norm, test_df_norm = normalize_columns(df, feature1, feature2, 0.8)
 
     inputs = get_input_layers(feature1, feature2)
 
     model = create_model(inputs, learning_rate)
 
-    train_df_norm = train_df_norm.dropna()
-
     epochs, hist = train_model(model, train_df_norm, epochs, "Hogwarts House", batch_size)
-    
 
+    ################ Eval Model
+
+    test_features = {name:np.array(value) for name, value in test_df_norm.items()}
+    test_label = np.array(test_features.pop('Hogwarts House'))
+
+    print('------------Evaluated Model------------')
+    eval = model.evaluate(test_features, test_label, batch_size=batch_size)
+    print('loss =', eval[0], '| accuracy =', eval[1])
 
     ################ Predict
 

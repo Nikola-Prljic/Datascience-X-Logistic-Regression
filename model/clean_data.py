@@ -17,11 +17,13 @@ def get_input_layers(feature1, feature2):
     }
     return inputs
 
-def normalize_columns(df, feature1, feature2):
+def normalize_columns(df: pd.DataFrame, feature1, feature2, split=0.8):
+    df = df.dropna()
     features = Normalize(pd.concat([df[feature1], df[feature2]]))
     df[feature1] = features.norm(df[feature1])
     df[feature2] = features.norm(df[feature2])
-    return df
+    split_index = int(len(df) * split)
+    return df[:split_index], df[split_index:]
 
 def prepare_output_layer(train_df: pd.DataFrame):
     #replace the house name with a number
