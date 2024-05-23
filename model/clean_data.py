@@ -1,6 +1,7 @@
 from src.utils.load_csv import load
 import tensorflow as tf
 import pandas as pd
+import numpy as np
 import keras
 from model.normalize import Normalize
 
@@ -9,29 +10,47 @@ def load_data(path_train, path_test):
     test_df = load(path_test)
     return train_df, test_df
 
-def get_input_layers(feature1, feature2):
+def get_input_layers(features):
     # Features used to train the model on.
     inputs = {
-        feature1: keras.Input(shape=(1,)),
-        feature2: keras.Input(shape=(1,))
+        features[0]: keras.Input(shape=(1,)),
+        features[1]: keras.Input(shape=(1,)),
+        features[2]: keras.Input(shape=(1,)),
+        features[3]: keras.Input(shape=(1,))
     }
     return inputs
 
-def normalize_columns(df: pd.DataFrame, feature1, feature2, split=0.8):
+def split_df(df: pd.DataFrame, split=0.8):
     df = df.dropna()
-    features = Normalize(pd.concat([df[feature1], df[feature2]]))
-    df[feature1] = features.norm(df[feature1])
-    df[feature2] = features.norm(df[feature2])
     split_index = int(len(df) * split)
     return df[:split_index], df[split_index:]
 
-def prepare_output_layer(train_df: pd.DataFrame):
-    #replace the house name with a number
-    train_df['Hogwarts House'].replace({'Gryffindor': 0, 'Slytherin': 1, 'Ravenclaw': 2, 'Hufflepuff': 3}, inplace=True)
-    return train_df
+def normalize(df: pd.DataFrame):
+    df_mean = df.mean()
+    df_std = df.std()
+    df = (df - df_mean) / df_std
+    return df
 
-def prepare_data(path_train, path_test):
-    train_df, test_df = load_data(path_train, path_test)
-    train_df = prepare_output_layer(train_df)
+def str_to_int(train_df: pd.DataFrame, test_df: pd.DataFrame):
+    house_dict = {'Gryffindor': 0, 'Slytherin': 1, 'Ravenclaw': 2, 'Hufflepuff': 3}
+    train_label = np.array(train_df['Hogwarts House'].replace(house_dict), dtype=np.int8)
+    test_label = np.array(test_df['Hogwarts House'].replace(house_dict), dtype=np.int8)
+    return train_label, test_label
+
+def prepare_data(path_train, path_test, split=0.8):
+    df, predict_df = load_data(path_train, path_test)
+
+    train_df, test_df = split_df(df, split)
+
+    train_label, test_label = str_to_int(train_df, test_df)
+
+    train_df = train_df.drop(['Hogwarts House'], axis=1)
+    test_df = test_df.drop(['Hogwarts House'], axis=1)
+    
     train_df = train_df.select_dtypes(include=['number'])
-    return train_df, test_df
+    test_df = test_df.select_dtypes(include=['number'])
+
+    train_df = normalize(train_df)
+    test_df = normalize(test_df)
+
+    return train_df, test_df, train_label, test_label

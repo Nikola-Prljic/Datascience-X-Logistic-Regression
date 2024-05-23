@@ -1,5 +1,4 @@
 from model.clean_data import prepare_data, get_input_layers
-from model.clean_data import normalize_columns
 import tensorflow as tf
 import numpy as np
 import keras
@@ -39,37 +38,33 @@ def create_model(my_inputs, my_learning_rate):
                     metrics=['accuracy'])
     return model
 
-def train_model(model: keras.Model, dataset: pd.DataFrame, epochs, label_name, batch_size=None, shuffle=True):
-    features = {name:np.array(value) for name, value in dataset.items()}
-    label = np.array(features.pop(label_name))
+def train_model(model: keras.Model, dataset: pd.DataFrame, label, epochs, label_name, batch_size=None, shuffle=True):
+    features = {name:np.array(value, dtype=np.float16) for name, value in dataset.items()}
     history = model.fit(x=features, y=label, batch_size=batch_size,
                         epochs=epochs, shuffle=shuffle)
     epochs = history.epoch
     hist = pd.DataFrame(history.history)
     return epochs, hist
 
-def logisticRegression(feature1, feature2, train_path, test_path, learning_rate, epochs, batch_size=10):
-    df, predict_df = prepare_data(train_path, test_path)
-    train_df_norm, test_df_norm = normalize_columns(df, feature1, feature2, 0.8)
+def logisticRegression(features_names, train_path, test_path, learning_rate, epochs, batch_size=10, split=0.8):
+    train_df, test_df, train_label, test_label = prepare_data(train_path, test_path, split)
 
-    inputs = get_input_layers(feature1, feature2)
-
+    inputs = get_input_layers(features_names)
     model = create_model(inputs, learning_rate)
 
-    epochs, hist = train_model(model, train_df_norm, epochs, "Hogwarts House", batch_size)
+    epochs, hist = train_model(model, train_df, train_label, epochs, "Hogwarts House", batch_size)
 
-    ################ Eval Model
+    ################ Eval Model #################
 
-    test_features = {name:np.array(value) for name, value in test_df_norm.items()}
-    test_label = np.array(test_features.pop('Hogwarts House'))
+    test_features = {name:np.array(value) for name, value in test_df.items()}
 
     print('------------Evaluated Model------------')
-    eval = model.evaluate(test_features, test_label, batch_size=batch_size)
+    eval = model.evaluate(test_features, test_label, batch_size=10)
     print('loss =', eval[0], '| accuracy =', eval[1])
 
-    ################ Predict
+    ################ Predict ####################
 
-    features = {name:np.array(value) for name, value in train_df_norm.items()}
+    features = {name:np.array(value) for name, value in train_df.items()}
     predict = model.predict(features)
     predict = np.argmax(predict[:20], axis=1)
     

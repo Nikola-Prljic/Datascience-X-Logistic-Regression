@@ -8,7 +8,9 @@ class Normalize():
 
   def norm(self, x):
     # Normalize the input
-    return (x - self.mean)/self.std
+    self.mean = np.mean(x)
+    self.std = np.std(x)
+    return (x - self.mean) / self.std
 
   def unnorm(self, x):
     # Unnormalize the input
