@@ -1,10 +1,12 @@
 from model.logistic_regression import logisticRegression
+from model.plotLoss import plot_loss
 
-learning_rate=0.001
-epochs = 35
-batch_size = 30
+learning_rate=0.004
+epochs = 100
+batch_size = 80
 
-model = logisticRegression('Muggle Studies', 'Charms',
+model, epochs, hist = logisticRegression('Muggle Studies', 'Charms',
                            'src/datasets/dataset_train.csv', 'src/datasets/dataset_test.csv',
                            learning_rate, epochs, batch_size)
 
+plot_loss(epochs, hist)
