@@ -5,5 +5,5 @@ def plot_loss(epochs, hist):
     plt.plot(epochs, hist['loss'], label='loss')
     plt.legend()
     plt.ylabel('epochs')
-    plt.ylabel('accuracy')
+    plt.ylabel('accuracy / loss')
     plt.show()

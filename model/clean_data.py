@@ -35,6 +35,7 @@ def str_to_int(train_df: pd.DataFrame, test_df: pd.DataFrame):
 
 def prepare_data(path_train, path_test, split=0.8):
     df, predict_df = load_data(path_train, path_test)
+    print(df)
     train_df, test_df = split_df(df, split)
     train_label, test_label = str_to_int(train_df, test_df)
 

@@ -4,6 +4,7 @@ import numpy as np
 import keras
 from keras import layers
 import pandas as pd
+import datetime
 
 def create_model(my_inputs: dict, my_learning_rate: int) -> keras.Model:
     
@@ -23,16 +24,21 @@ def create_model(my_inputs: dict, my_learning_rate: int) -> keras.Model:
     model.compile(optimizer=keras.optimizers.Adam(learning_rate=my_learning_rate),
                   loss="sparse_categorical_crossentropy",
                   metrics=['accuracy'])
-    return model
+    
+    log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
-def train_model(model: keras.Model, dataset: pd.DataFrame, label, epochs, batch_size=10, shuffle=True):
+    return model, tensorboard_callback
+
+def train_model(model: keras.Model, tensorboard_callback, dataset: pd.DataFrame, label, epochs, batch_size=10, shuffle=True):
     
     # Create features dict
     features = {name:np.array(value, dtype=np.float16) for name, value in dataset.items()}
     
     # Fit everything into the model and set
     history = model.fit(x=features, y=label, batch_size=batch_size,
-                        epochs=epochs, shuffle=shuffle)
+                        epochs=epochs, shuffle=shuffle,
+                        callbacks=[tensorboard_callback])
     
     # Save the loss and accuracy
     epochs = history.epoch
@@ -61,8 +67,11 @@ def logisticRegression(features_names, train_path, test_path, learning_rate, epo
 
     # Create a dict with the input labels
     inputs = get_input_layers(features_names)
-    model = create_model(inputs, learning_rate)
-    epochs, hist = train_model(model, train_df, train_label, epochs, batch_size)
+
+    model, tensorboard_callback = create_model(inputs, learning_rate)
+
+    epochs, hist = train_model(model, tensorboard_callback,
+                               train_df, train_label, epochs, batch_size)
 
     # Eval :O
     evaluate_model(model, train_df, test_df, test_label)
