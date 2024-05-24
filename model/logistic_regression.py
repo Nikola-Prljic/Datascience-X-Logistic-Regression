@@ -1,10 +1,11 @@
-from model.clean_data import prepare_data, get_input_layers
 import tensorflow as tf
-import numpy as np
-import keras
+
+from model.clean_data import prepare_data, get_input_layers
 from keras import layers
 import pandas as pd
+import numpy as np
 import datetime
+import keras
 
 def create_model(my_inputs: dict, my_learning_rate: int) -> keras.Model:
     
@@ -16,7 +17,7 @@ def create_model(my_inputs: dict, my_learning_rate: int) -> keras.Model:
     x = layers.Dense(32, activation='elu', name='16')(x)
     x = layers.Dropout(rate=0.4, name='dropout')(x)
 
-    # Create output layer we need for because we have 4 possibilities
+    # Create output layer because we have 4 possibilities
     output = layers.Dense(4, activation='softmax')(x)
 
     # Create Model and use a more accurate loss
@@ -26,7 +27,7 @@ def create_model(my_inputs: dict, my_learning_rate: int) -> keras.Model:
                   metrics=['accuracy'])
     
     log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+    tensorboard_callback = keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
     return model, tensorboard_callback
 
