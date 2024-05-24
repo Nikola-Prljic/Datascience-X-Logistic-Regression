@@ -4,8 +4,6 @@ import pandas as pd
 import numpy as np
 import keras
 
-from model.normalize import Normalize
-
 def load_data(path_train, path_test):
     train_df = load(path_train)
     test_df = load(path_test)
