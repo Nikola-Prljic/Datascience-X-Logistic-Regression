@@ -14,6 +14,7 @@ train_test_split = 0.8
 
 # You can add here Features with that the Model can train.
 # Just look pick 2 or more.
+
 features_names = ['Muggle Studies', 'Charms', 'Defense Against the Dark Arts', 'Transfiguration', 'Arithmancy']
 
 model, epochs, hist = logisticRegression(features_names,
