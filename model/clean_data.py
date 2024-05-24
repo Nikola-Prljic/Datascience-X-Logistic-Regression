@@ -10,7 +10,6 @@ def load_data(path_train, path_test):
     return train_df, test_df
 
 def get_input_layers(features):
-    # Features used to train the model on.
     inputs = {name: keras.Input(shape=(1,)) for name in features}
     return inputs
 
